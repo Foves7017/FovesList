@@ -1,0 +1,189 @@
+/* ===== 回收站专用样式 =====
+   基础变量和暗/亮色主题复用 index.css */
+
+/* ── 覆盖 index.css 的 overflow:hidden，让整页可滚动 ── */
+.trash-page {
+    overflow-y: auto;
+
+    /* 隐藏滚动条 */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.trash-page::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── 容器 ── */
+.trash-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px 20px;
+}
+
+/* ── 头部 ── */
+.trash-container header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.trash-container header h1 {
+    font-size: 1.35rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--text);
+}
+
+.btn-back {
+    background: var(--surface-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 6px 14px;
+    font-family: var(--font);
+    font-weight: var(--font-weight);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.btn-back:hover {
+    color: var(--text);
+    border-color: var(--accent);
+    background: var(--surface);
+}
+
+/* ── 主区域 ── */
+.trash-main {
+    flex: 1;
+    padding: 8px 0 60px;
+}
+
+.trash-count {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.trash-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    padding: 60px 0;
+}
+
+/* ── 列表 ── */
+.trash-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.trash-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.trash-item:hover {
+    border-color: var(--accent);
+}
+
+/* 按象限着色 */
+.trash-item[data-q="q1"] { background: var(--q1); }
+.trash-item[data-q="q2"] { background: var(--q2); }
+.trash-item[data-q="q3"] { background: var(--q3); }
+.trash-item[data-q="q4"] { background: var(--q4); }
+
+.trash-item[data-q="q1"]:hover,
+.trash-item[data-q="q2"]:hover,
+.trash-item[data-q="q3"]:hover,
+.trash-item[data-q="q4"]:hover {
+    border-color: var(--accent);
+}
+
+.trash-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.trash-item-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+    word-break: break-all;
+}
+
+.trash-item-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.trash-item-meta span {
+    white-space: nowrap;
+}
+
+.trash-item-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    line-height: 1.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.btn-restore {
+    flex-shrink: 0;
+    background: var(--accent);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    padding: 6px 14px;
+    font-family: var(--font);
+    font-weight: 500;
+    font-size: 0.82rem;
+    transition: opacity 0.2s, transform 0.15s;
+}
+
+.btn-restore:hover {
+    opacity: 0.85;
+}
+
+.btn-restore:active {
+    transform: scale(0.95);
+}
+
+/* ── 底部 ── */
+.trash-container footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 8px 0 14px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    pointer-events: none;
+}

@@ -1,0 +1,463 @@
+/* ===== 基础重置 & 全局 ===== */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ── 暗色主题（默认） ── */
+:root {
+    --bg: #0f0f1a;
+    --surface: #1a1a2e;
+    --surface-light: #222240;
+    --text: #e0e0e8;
+    --text-muted: #8888a0;
+    --accent: #7c8cf8;
+    --border: #2a2a45;
+    --font-weight: 300;
+
+    /* 象限背景 */
+    --q1: rgba(255, 107, 107, 0.18);
+    --q1-dot: #ff6b6b;
+    --q2: rgba(255, 184, 77, 0.16);
+    --q2-dot: #ffb84d;
+    --q3: rgba(150, 150, 170, 0.12);
+    --q3-dot: #9696aa;
+    --q4: rgba(77, 166, 255, 0.18);
+    --q4-dot: #4da6ff;
+
+    /* Canvas 绘制颜色 */
+    --chart-bg: #1a1a2e;
+    --chart-grid: rgba(255,255,255,0.06);
+    --chart-axis: rgba(255,255,255,0.35);
+    --chart-tick: rgba(255,255,255,0.2);
+    --chart-label: rgba(255,255,255,0.5);
+    --chart-quadrant-label: rgba(255,255,255,0.22);
+    --chart-dot-stroke: rgba(255,255,255,0.5);
+    --chart-title-text: rgba(255,255,255,0.85);
+    --chart-title-bg: rgba(15,15,26,0.75);
+    --chart-title-filled: rgba(255,255,255,0.9);
+    --chart-hover-ring: #fff;
+    --chart-quadrant-bg-alpha: 0.10;
+    --tooltip-shadow: 0 8px 24px rgba(0,0,0,0.45);
+
+    --radius: 10px;
+    --font: "Maple Mono NF CN", "Segoe UI", "PingFang SC", "Microsoft YaHei", monospace;
+}
+
+/* ── 亮色主题 ── */
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg: #f5f5f0;
+        --surface: #ffffff;
+        --surface-light: #f0f0e8;
+        --text: #2a2a30;
+        --text-muted: #888890;
+        --accent: #5a6ae0;
+        --border: #ddd8d0;
+
+        --q1: rgba(255, 107, 107, 0.12);
+        --q2: rgba(255, 184, 77, 0.10);
+        --q3: rgba(150, 150, 170, 0.08);
+        --q4: rgba(77, 166, 255, 0.12);
+
+        --chart-bg: #ffffff;
+        --chart-grid: rgba(0,0,0,0.06);
+        --chart-axis: rgba(0,0,0,0.25);
+        --chart-tick: rgba(0,0,0,0.15);
+        --chart-label: rgba(0,0,0,0.45);
+        --chart-quadrant-label: rgba(0,0,0,0.18);
+        --chart-dot-stroke: rgba(0,0,0,0.3);
+        --chart-title-text: rgba(0,0,0,0.8);
+        --chart-title-bg: rgba(255,255,250,0.8);
+        --chart-title-filled: rgba(0,0,0,0.85);
+        --chart-hover-ring: #333;
+        --chart-quadrant-bg-alpha: 0.07;
+        --tooltip-shadow: 0 8px 24px rgba(0,0,0,0.10);
+    }
+}
+
+html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-weight: var(--font-weight);
+    overflow: hidden;
+}
+
+/* ===== 容器 ===== */
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 16px 20px;
+    transition: max-width 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* 面板打开时，容器扩宽以容纳侧边面板，图表保持正方形 */
+body.panel-open .container {
+    max-width: 1280px;
+}
+
+/* ===== 头部 ===== */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    flex-shrink: 0;
+}
+
+header h1 {
+    font-size: 1.35rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--text);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* 状态指示灯 */
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #555;
+    transition: background 0.3s;
+    display: inline-block;
+}
+.status-dot.loading { background: #f0c040; animation: pulse 0.8s ease-in-out infinite; }
+.status-dot.online  { background: #4ade80; }
+.status-dot.offline { background: #f87171; }
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+}
+
+/* 刷新按钮 */
+.btn-refresh {
+    background: var(--surface-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.btn-refresh:hover {
+    color: var(--text);
+    border-color: var(--accent);
+    background: var(--surface);
+}
+.btn-refresh:active {
+    transform: scale(0.95);
+}
+.btn-refresh svg {
+    display: block;
+}
+
+/* 回收站按钮 */
+.btn-trash {
+    background: var(--surface-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 5px 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.btn-trash:hover {
+    color: var(--text);
+    border-color: var(--accent);
+    background: var(--surface);
+}
+.btn-trash:active {
+    transform: scale(0.95);
+}
+.btn-trash svg {
+    display: block;
+}
+
+/* ===== 主区域：图表 + 侧边面板 ===== */
+.main-area {
+    flex: 1;
+    display: flex;
+    position: relative;
+    gap: 0;
+    min-height: 0;
+}
+
+/* ===== 图表区域 ===== */
+.chart-wrapper {
+    flex: 0 0 auto;
+    position: relative;
+    aspect-ratio: 1 / 1;
+    height: 100%;
+    max-height: 100%;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+#quadrantChart {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: default;
+}
+
+#quadrantChart.grabbable {
+    cursor: grab;
+}
+
+#quadrantChart.grabbing {
+    cursor: grabbing;
+}
+
+/* 空白区域 → 十字光标，暗示双击可建新事件 */
+#quadrantChart:not(.grabbable):not(.grabbing) {
+    cursor: crosshair;
+}
+
+/* ===== 右侧详情面板 ===== */
+.detail-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 300px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transform: translateX(320px);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+                opacity   0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+                visibility 0s 0.4s;
+    z-index: 5;
+    overflow-y: auto;
+}
+
+body.panel-open .detail-panel {
+    transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
+    transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+                opacity   0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+                visibility 0s 0s;
+}
+
+.dp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dp-header h3 {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text);
+    word-break: break-all;
+}
+
+.dp-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, background 0.2s;
+    flex-shrink: 0;
+}
+.dp-close:hover {
+    color: var(--text);
+    background: var(--surface-light);
+}
+
+.dp-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dp-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dp-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.dp-value {
+    font-size: 0.9rem;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.dp-desc {
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* ===== 内联编辑 ===== */
+.dp-editable {
+    cursor: text;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: -2px -4px;
+    transition: background 0.15s;
+}
+
+.dp-editable:hover {
+    background: var(--surface-light);
+}
+
+.dp-edit-input {
+    background: var(--surface-light);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: inherit;
+    width: 100%;
+    padding: 2px 6px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.dp-edit-textarea {
+    background: var(--surface-light);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--font);
+    font-weight: var(--font-weight);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    width: 100%;
+    padding: 6px 8px;
+    outline: none;
+    resize: vertical;
+    min-height: 60px;
+    box-sizing: border-box;
+}
+
+/* ===== 子任务 ===== */
+.dp-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0 0;
+}
+
+.dp-sub-header {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.dp-sub-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dp-sub-item {
+    font-size: 0.82rem;
+    color: var(--text);
+    padding: 4px 8px;
+    background: var(--surface-light);
+    border-radius: 4px;
+    word-break: break-all;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+
+.dp-sub-item:hover {
+    background: var(--border);
+}
+
+.dp-sub-item.done {
+    text-decoration: line-through;
+    opacity: 0.5;
+    color: var(--text-muted);
+}
+
+.dp-sub-item.done:hover {
+    background: var(--surface-light);
+}
+
+.dp-add-sub {
+    background: none;
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    color: var(--text-muted);
+    font-family: var(--font);
+    font-weight: var(--font-weight);
+    font-size: 0.8rem;
+    padding: 6px 0;
+    cursor: pointer;
+    text-align: center;
+    transition: opacity 0.2s, color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.dp-add-sub:hover {
+    color: var(--text);
+    border-color: var(--accent);
+    background: var(--surface-light);
+}
+
+/* ===== 底部 ===== */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 8px 0 14px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* ===== 通用工具类 ===== */
+.hidden {
+    display: none !important;
+}

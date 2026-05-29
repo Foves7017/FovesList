@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>回收站 — FovesList</title>
+    <link rel="stylesheet" href="/index.css">
+    <link rel="stylesheet" href="/trash.css">
+</head>
+<body class="trash-page">
+    <div class="trash-container">
+        <header>
+            <h1>🗑️ 回收站</h1>
+            <div class="header-actions">
+                <a href="/events" class="btn-back" title="返回象限图">← 返回</a>
+            </div>
+        </header>
+
+        <main class="trash-main">
+            <p id="trashCount" class="trash-count"></p>
+            <ul id="trashList" class="trash-list"></ul>
+            <p id="trashEmpty" class="trash-empty hidden">回收站空空如也 ✨</p>
+        </main>
+
+        <footer>
+            <span>归档事件不会自动删除，请放心</span>
+        </footer>
+    </div>
+
+    <script src="/trash.js"></script>
+</body>
+</html>
