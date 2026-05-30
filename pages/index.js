@@ -49,6 +49,10 @@ let chartColors = {};                // 从 CSS 变量读取的 Canvas 配色，
 
 // 卫星动画
 let satelliteAngles = {};            // { title: { angles[], dists[], speed } }
+let labelAlphas = {};                // { title: currentAlpha } — 标签透明度动画
+const LABEL_ALPHA_IDLE = 0.5;        // 非悬停标签透明度
+const LABEL_ALPHA_HOVER = 1.0;       // 悬停标签透明度
+const LABEL_ALPHA_SPEED = 3.0;       // 过渡速度（每秒变化量）
 let lastFrameTime = 0;
 
 // ==================== 工具函数 ====================
@@ -450,6 +454,11 @@ function drawEventPoint(ex, ey, ev, isDark) {
     const bgX = align === 'right' ? labelX - textW - padX : labelX - padX;
     const bgY = labelY - textH / 2 - padY;
 
+    // 标签透明度动画（平滑过渡）
+    const labelAlpha = labelAlphas[ev.title] !== undefined ? labelAlphas[ev.title] : LABEL_ALPHA_IDLE;
+    ctx.save();
+    ctx.globalAlpha = labelAlpha;
+
     ctx.fillStyle = chartColors.titleBg;
     ctx.beginPath();
     ctx.roundRect(bgX, bgY, textW + padX * 2, textH + padY * 2, 5);
@@ -457,6 +466,8 @@ function drawEventPoint(ex, ey, ev, isDark) {
 
     ctx.fillStyle = chartColors.titleFilled;
     ctx.fillText(displayTitle, labelX, labelY);
+
+    ctx.restore();
 }
 
 /** 悬停高亮环 */
@@ -1156,7 +1167,7 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
 
 function animateLoop(timestamp) {
     if (!lastFrameTime) lastFrameTime = timestamp;
-    const dt = (timestamp - lastFrameTime) / 1000;  // 秒
+    const dt = Math.min((timestamp - lastFrameTime) / 1000, 0.1);  // 秒，上限防跳帧
     lastFrameTime = timestamp;
 
     // 旋转所有卫星
@@ -1165,6 +1176,21 @@ function animateLoop(timestamp) {
         if (!sat) continue;
         for (let i = 0; i < sat.angles.length; i++) {
             sat.angles[i] = (sat.angles[i] + sat.speed * dt) % (Math.PI * 2);
+        }
+    }
+
+    // 标签透明度动画
+    const hoveredTitle = (hoveredIndex >= 0 && hoveredIndex < eventPositions.length)
+        ? eventPositions[hoveredIndex].event.title
+        : null;
+    for (const ev of events) {
+        const target = (ev.title === hoveredTitle) ? LABEL_ALPHA_HOVER : LABEL_ALPHA_IDLE;
+        const current = labelAlphas[ev.title] !== undefined ? labelAlphas[ev.title] : LABEL_ALPHA_IDLE;
+        const diff = target - current;
+        if (Math.abs(diff) < 0.005) {
+            labelAlphas[ev.title] = target;
+        } else {
+            labelAlphas[ev.title] = current + Math.sign(diff) * Math.min(Math.abs(diff), LABEL_ALPHA_SPEED * dt);
         }
     }
 

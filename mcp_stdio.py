@@ -203,22 +203,13 @@ def add_sub_event(title: str, sub_title: str) -> str:
     Returns:
         操作结果描述
     """
-    ev = _find_event(title)
-    if ev is None:
-        return f"❌ 未找到事件「{title}」"
-
-    subs: list[str] = list(ev.get("sub_event") or [])
-    if sub_title in subs:
-        return f"⚠️ 子任务「{sub_title}」已存在"
-
-    # 也检查 ~xxx~ 完成状态
-    completed = f"~{sub_title}~"
-    if completed in subs:
-        return f"⚠️ 已完成子任务「{sub_title}」已存在"
-
-    subs.append(sub_title)
-    _update(title, "sub_event", json.dumps(subs, ensure_ascii=False))
-    return f"✅ 已为「{title}」添加子任务「{sub_title}」"
+    r = requests.post(
+        f"{EVENTS_URL}/sub/add",
+        data={"title": title, "sub_title": sub_title},
+        timeout=5,
+    )
+    r.raise_for_status()
+    return r.json().get("message", "未知结果")
 
 
 @mcp.tool()
@@ -233,21 +224,13 @@ def remove_sub_event(title: str, sub_title: str) -> str:
     Returns:
         操作结果描述
     """
-    ev = _find_event(title)
-    if ev is None:
-        return f"❌ 未找到事件「{title}」"
-
-    subs: list[str] = list(ev.get("sub_event") or [])
-    targets = [sub_title, f"~{sub_title}~"]
-
-    removed = [s for s in targets if s in subs]
-    if not removed:
-        return f"⚠️ 未找到子任务「{sub_title}」"
-
-    new_subs = [s for s in subs if s not in targets]
-    _update(title, "sub_event", json.dumps(new_subs, ensure_ascii=False))
-    status = "已完成" if removed[0].startswith("~") else "未完成"
-    return f"🗑️ 已从「{title}」删除{status}子任务「{sub_title}」"
+    r = requests.post(
+        f"{EVENTS_URL}/sub/remove",
+        data={"title": title, "sub_title": sub_title},
+        timeout=5,
+    )
+    r.raise_for_status()
+    return r.json().get("message", "未知结果")
 
 
 @mcp.tool()
@@ -264,26 +247,13 @@ def toggle_sub_event(title: str, sub_title: str) -> str:
     Returns:
         操作结果描述
     """
-    ev = _find_event(title)
-    if ev is None:
-        return f"❌ 未找到事件「{title}」"
-
-    subs: list[str] = list(ev.get("sub_event") or [])
-    raw = sub_title
-    completed = f"~{sub_title}~"
-
-    if completed in subs:
-        # 已完成 → 恢复
-        new_subs = [raw if s == completed else s for s in subs]
-        _update(title, "sub_event", json.dumps(new_subs, ensure_ascii=False))
-        return f"🔄 子任务「{sub_title}」已恢复为未完成"
-    elif raw in subs:
-        # 未完成 → 完成
-        new_subs = [completed if s == raw else s for s in subs]
-        _update(title, "sub_event", json.dumps(new_subs, ensure_ascii=False))
-        return f"✅ 子任务「{sub_title}」已标记为完成"
-    else:
-        return f"⚠️ 未找到子任务「{sub_title}」"
+    r = requests.post(
+        f"{EVENTS_URL}/sub/toggle",
+        data={"title": title, "sub_title": sub_title},
+        timeout=5,
+    )
+    r.raise_for_status()
+    return r.json().get("message", "未知结果")
 
 
 # ---------------------------------------------------------------------------

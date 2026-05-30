@@ -91,6 +91,9 @@ FovesList/
 | `/events/update` | POST | 修改事件属性 |
 | `/events/deleted/list` | GET | 已归档事件列表 |
 | `/events/deleted/restore` | POST | 恢复归档事件 |
+| `/events/sub/add` | POST | 原子追加子任务 |
+| `/events/sub/toggle` | POST | 原子切换子任务完成状态 |
+| `/events/sub/remove` | POST | 原子删除子任务 |
 
 ---
 
@@ -114,3 +117,7 @@ fastmcp run mcp_stdio.py
 - **前端**：原生 HTML / CSS / JS，Canvas 绘图，无框架
 - **存储**：JSON 文件（`json/Events.json` / `json/DeletedEvents.json`，目录自动创建）
 - **MCP**：FastMCP
+
+## 设计要点
+
+子任务操作（add / toggle / remove）使用**原子化端点**：不经过 GET→本地修改→POST 的分离流程，而是由单一 POST 在 `threading.Lock` 内完成读-改-写全流程，避免并发竞态。5 并发测试无丢失。

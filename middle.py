@@ -114,4 +114,26 @@ async def update_event_(
     update_event(title, prop_name, val)
     return {"status": "success"}
 
+
+# ---------------------------------------------------------------------------
+# 子任务原子端点 — 全程在 backend 锁内完成
+# ---------------------------------------------------------------------------
+@app.post("/events/sub/add")
+async def sub_add_(title: str = fastapi.Form(), sub_title: str = fastapi.Form()):
+    ok, msg = sub_add(title, sub_title)
+    return {"status": "success" if ok else "error", "message": msg}
+
+
+@app.post("/events/sub/toggle")
+async def sub_toggle_(title: str = fastapi.Form(), sub_title: str = fastapi.Form()):
+    ok, msg = sub_toggle(title, sub_title)
+    return {"status": "success" if ok else "error", "message": msg}
+
+
+@app.post("/events/sub/remove")
+async def sub_remove_(title: str = fastapi.Form(), sub_title: str = fastapi.Form()):
+    ok, msg = sub_remove(title, sub_title)
+    return {"status": "success" if ok else "error", "message": msg}
+
+
 # uvicorn middle:app --reload --port 23535
