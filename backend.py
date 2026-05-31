@@ -191,6 +191,15 @@ def sub_remove(title: str, sub_title: str) -> tuple[bool, str]:
         return False, f"❌ 未找到事件「{title}」"
 
 
+def sub_list(title: str) -> tuple[bool, list[str] | str]:
+    """获取某个事件的子任务列表。返回 (成功?, 子任务列表或错误消息)"""
+    events = load_events_from_database()
+    for ev in events:
+        if ev.title == title:
+            return True, list(ev.sub_event)
+    return False, f"❌ 未找到事件「{title}」"
+
+
 def list_deleted_events() -> list[Event]:
     return _load_deleted()
 

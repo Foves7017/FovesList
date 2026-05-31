@@ -136,4 +136,15 @@ async def sub_remove_(title: str = fastapi.Form(), sub_title: str = fastapi.Form
     return {"status": "success" if ok else "error", "message": msg}
 
 
+@app.get("/events/sub/list")
+async def sub_list_(title: str = fastapi.Query()):
+    ok, result = sub_list(title)
+    if not ok:
+        return fastapi.responses.JSONResponse(
+            status_code=404,
+            content={"status": "error", "message": result}
+        )
+    return {"status": "success", "sub_events": result}
+
+
 # uvicorn middle:app --reload --port 23535

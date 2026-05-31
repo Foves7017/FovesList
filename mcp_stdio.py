@@ -256,6 +256,35 @@ def toggle_sub_event(title: str, sub_title: str) -> str:
     return r.json().get("message", "未知结果")
 
 
+@mcp.tool()
+def get_sub_events(title: str) -> str:
+    """
+    获取某个事件的所有子任务及其完成状态。
+
+    Args:
+        title: 事件标题
+
+    Returns:
+        子任务列表，含完成状态
+    """
+    r = requests.get(f"{EVENTS_URL}/sub/list", params={"title": title}, timeout=5)
+    if r.status_code == 404:
+        return r.json().get("message", f"❌ 未找到事件「{title}」")
+    r.raise_for_status()
+    data = r.json()
+    subs = data.get("sub_events", [])
+    if not subs:
+        return f"📭 事件「{title}」没有子任务"
+
+    lines = [f"事件「{title}」共 {len(subs)} 个子任务："]
+    for i, s in enumerate(subs, 1):
+        done = s.startswith("~") and s.endswith("~")
+        mark = "✅" if done else "⬜"
+        display = s.strip("~") if done else s
+        lines.append(f"  {i}. {mark} {display}")
+    return "\n".join(lines)
+
+
 # ---------------------------------------------------------------------------
 # 工具：回收站
 # ---------------------------------------------------------------------------
